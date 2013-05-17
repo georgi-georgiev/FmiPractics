@@ -1,0 +1,122 @@
+#include <iostream>
+#include "List.h"
+#define _CRT_SECURE_CPP_OVERLOAD_SECURE_NAMES 1
+using namespace std;
+template <typename T>
+struct Item
+{
+  T value;
+};
+
+template <typename T>
+class Storable
+{
+protected:
+	LinkedList<Item<T>> content;
+	char name[32];
+public:
+	Storable(const char* n)
+	{
+		strcpy(name,n);
+	}
+	void Store(Item<T> items[], int size)
+	{
+		for(int i=0; i < size; ++i)
+		{
+			content.add(items[i]);
+		}
+	}
+	void print()
+	{
+		cout<<"Name: "<<name<<endl;
+		for(int i=0; i<content.size(); ++i)
+		{
+			cout<<content.getAt(i).value<<" ";
+		}
+	}
+};
+
+template <typename T>
+class Receiver : public Storable<T>
+{
+	static int const SIZE = 4;
+	int count;
+	Item<T> buffer[SIZE];
+	double frequency;
+public:
+	Receiver(const char* name, double f): Storable(name)
+	{
+		frequency = f;
+		count=0;
+	}
+	void receive(Item<T> item)
+	{
+		buffer[count] = item;
+		++count;
+		if(count >= SIZE)
+		{
+			Store(buffer, count)
+			count=0;
+		}
+	}
+	void print()
+	{
+		Storable::print();
+		cout<<"Frequncy: "<<frequency<<endl;
+		cout<<"Buffer: ";
+		for(int i=0; i < count; ++i)
+		{
+			cout<<buffer[i].value<<" ";
+		}
+		cout<<endl;
+	}
+};
+
+template <typename T>
+class Transmitter : public Storable<T>
+{
+	double frequency;
+public:
+	Transmitter(const char* name, double f): Storable(name)
+	{
+		frequency = f;
+	}
+	void transmit()
+	{
+		content.removeAt(0);
+	}
+	void print()
+	{
+		Storable::print();
+		cout<<endl;
+		cout<<"Frequency: "<<frequency<<endl;
+		cout<<endl;
+	}
+};
+
+template <typename T>
+class Radio : public Receiver<T>, public Transmitter<T>
+{
+public:
+	Radio(const char* name, double f):Receiver(name, f),Transmitter(name, f)
+	{
+	}
+	void print()
+	{
+		Receiver:print();
+		Transmitter::print();
+	}
+
+};
+
+int main()
+{
+	Radio<char> r("Radio", 5.5);
+	Item<char> items[2];
+	items[0].value = 'a';
+	items[1].value = 'b';
+	r.Store(items, 2);
+	r.print();
+	system("Pause");
+	return 0;
+}
